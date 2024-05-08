@@ -1,51 +1,91 @@
 #include "variadic_functions.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdarg.h>
 
 /**
- * print_all - Prints all of the arguments when specified
- * @format: specifies the necessary operations
- * Return: void
+ *print_all - prints a range of data types
+ *
+ *@format: The format arrangement of parameters
+ *Return: void
  */
-
 void print_all(const char * const format, ...)
 {
-	int i;
-	int flag;
-	char *str;
-	va_list a_list;
+	int i = 0, match;
 
-	va_start(a_list, format);
-	i = 0;
-	while (format != NULL && format[i] != '\0')
+	va_list ap;
+
+	va_start(ap, format);
+	while (format && format[i] != '\0')
 	{
-		switch (format[i])
+		match = 0;
+		match = print_case(format[i], ap);
+		if (still_match((format + i + 1)) && match)
 		{
-			case 'c':
-				printf("%c", va_arg(a_list, int));
-				flag = 0;
-				break;
-			case 'i':
-				printf("%i", va_arg(a_list, int));
-				flag = 0;
-				break;
-			case 'f':
-				printf("%f", va_arg(a_list, double));
-				flag = 0;
-				break;
-			case 's':
-				str = va_arg(a_list, char*);
-				if (str == NULL)
-					str = "(nil)";
-				printf("%s", str);
-				flag = 0;
-				break;
-			default:
-				flag = 1;
-				break;
+			printf("%s", ", ");
 		}
-		if (format[i + 1] != '\0' && flag == 0)
-			printf(", ");
 		i++;
 	}
 	printf("\n");
-	va_end(a_list);
+	va_end(ap);
+}
+
+/**
+ *still_match - Checks if there is still a valid data type left
+ *
+ *@rem: remaining characters in string format
+ *Return: An integer representing true or false
+ */
+int still_match(const char *rem)
+{
+	switch (*rem)
+	{
+	case '\0':
+		return (0);
+	case 'c':
+		return (1);
+	case 'i':
+		return (1);
+	case 'f':
+		return (1);
+	case 's':
+		return (1);
+	}
+	return (still_match(rem + 1));
+}
+
+/**
+ *print_case - checks for each case type and prints accordingly
+ *
+ *@ap: a va_list type
+ *@sample: a string predicting formats of var
+ *Return: gives back an integer if there was a match
+ */
+int print_case(const char sample, va_list ap)
+{
+	char *sp;
+
+	switch (sample)
+		{
+		case 'c':
+			printf("%c", va_arg(ap, int));
+			return (1);
+		case 'i':
+			printf("%d", va_arg(ap, int));
+			return (1);
+		case 'f':
+			printf("%f", va_arg(ap, double));
+			return (1);
+		case 's':
+			sp = va_arg(ap, char *);
+			if (sp == NULL)
+			{
+				printf("(nil)");
+				return (1);
+			}
+			printf("%s", sp);
+			return (1);
+		}
+	return (0);
 }
